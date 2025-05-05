@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bipp-Bingo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 15px;
+      max-width: 440px;
+      margin: auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+      word-wrap: break-word;
+      line-height: 1.2;
+      transition: background 0.3s;
+    }
+
+    .cell.marked {
+      background: lightgreen;
+    }
+
+    .cell.win {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1> Bipp-Bingo 🎉🎉🎉</h1>
+  <div class="bingo-grid" id="bingoGrid"></div>
+
+  <script>
+    const grid = document.getElementById('bingoGrid');
+
+    const words = [
+      "\"Ich sehe verhaltenes Nicken\"", "Die letzten 20 Folien werden auf doppelter Geschwindigkeit durchgezogen", "Frau Bipp erwähnt Star Wars", "Eine erschlagende Folie aus dem Lehrbuch",
+      "Meme", "\"Das kling alles sehr abstrakt\"", "Heico wird gerostet", "\"One size does not fit all\"",
+      "Die Vorlesung findet plötzlich in einer anderen Sprache statt", "Frau Bipp erwähnt James Bond", "Let Op!", "\"Ich versuche sie jetzt wieder einzufangen\"",
+      "\"... aber ich hab es trotzdem mal mitreingepackt\"", "Universitäre Strukturen werden kritisiert", "Frau Bipp trinkt einen Schluck Cola-light", "Die Studentin im Callcenter wird erwähnt"
+    ];
+
+    let cells = [];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function generateCard() {
+      const shuffled = shuffle([...words]);
+      shuffled.forEach(word => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = word;
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('marked');
+          checkWin(); // Auto-check on click
+        });
+        grid.appendChild(cell);
+        cells.push(cell);
+      });
+    }
+
+    function checkWin() {
+      // Clear previous win highlights
+      cells.forEach(cell => cell.classList.remove('win'));
+
+      const indexes = [...Array(16).keys()];
+      const grid2D = [];
+      while (indexes.length) grid2D.push(indexes.splice(0, 4));
+
+      const wins = [];
+
+      // Rows
+      for (let row of grid2D) {
+        if (row.every(i => cells[i].classList.contains('marked'))) {
+          wins.push(...row);
+        }
+      }
+
+      // Columns
+      for (let col = 0; col < 4; col++) {
+        const column = [grid2D[0][col], grid2D[1][col], grid2D[2][col], grid2D[3][col]];
+        if (column.every(i => cells[i].classList.contains('marked'))) {
+          wins.push(...column);
+        }
+      }
+
+      // Diagonals
+      const diag1 = [grid2D[0][0], grid2D[1][1], grid2D[2][2], grid2D[3][3]];
+      const diag2 = [grid2D[0][3], grid2D[1][2], grid2D[2][1], grid2D[3][0]];
+
+      if (diag1.every(i => cells[i].classList.contains('marked'))) wins.push(...diag1);
+      if (diag2.every(i => cells[i].classList.contains('marked'))) wins.push(...diag2);
+
+      if (wins.length > 0) {
+        wins.forEach(i => cells[i].classList.add('win'));
+        setTimeout(() => alert("Bingo 🎉🎉🎉"), 100);
+      }
+    }
+
+    generateCard();
+  </script>
+</body>
+</html>
